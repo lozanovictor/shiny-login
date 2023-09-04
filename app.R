@@ -26,7 +26,9 @@ loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margi
                      br(),
                      tags$code("Username: admin, prof, gest, equi"),
                      br(),
-                     tags$code("Password: admin, prof, gest, equi")
+                     tags$code("Password: admin, prof, gest, equi"), 
+                     br(),
+                     tags$code("match them")
                    ))
 )
 
@@ -35,14 +37,14 @@ credentials = data.frame(
   username_id = c("admin", "prof", "gest", "equi"),
   
   #SENHAS (LINKAR COM O RSQLITE)
-  passod   = sapply(c("admin", "prof", "gest", "equi"),password_store),
+  passod = sapply(c("admin", "prof", "gest", "equi"),password_store),
   
   #SENHAS (CRIAR UM CAMPO EXTRA PRA LINKAR NO SQL)
-  permission  = c("advanced", "prof", "gest", "equi"), 
+  permission = c("advanced", "prof", "gest", "equi"), 
   stringsAsFactors = F
 )
 
-header <- dashboardHeader( title = "Simple Dashboard", uiOutput("logoutbtn"))
+header <- dashboardHeader( title = "Painel Lateral", uiOutput("logoutbtn"))
 
 sidebar <- dashboardSidebar(uiOutput("sidebarpanel")) 
 body <- dashboardBody(shinyjs::useShinyjs(), uiOutput("body"))
@@ -86,6 +88,9 @@ server <- function(input, output, session) {
                     font-weight: bold; margin:5px; padding: 10px;")
   })
   
+  
+  #Renderiza a barra lateral e mostra as abas permitidas do usuário
+
   output$sidebarpanel <- renderUI({
     
     if (USER$login == TRUE ){ 
@@ -122,17 +127,19 @@ server <- function(input, output, session) {
     }
   })
   
+  #Renderiza as abas permitidas do usuário
   output$body <- renderUI({
     if (USER$login == TRUE ) {
+      #Credencial de administrador
       if (credentials[,"permission"][which(credentials$username_id==input$userName)]=="advanced") {
+        #tabItens renderiza os itens (tabItem) das abas
         tabItems(
           tabItem(
             tabName ="dashboard", class = "active",
             fluidRow(
               box(width = 12, dataTableOutput('results'))
             )
-          )
-          ,
+          ),
           tabItem(
             tabName ="About",
             h2("Essa é a pagina do Administrador")
@@ -140,6 +147,7 @@ server <- function(input, output, session) {
         )
       } 
       else {
+        #Credencial de Profissional
         if (credentials[,"permission"][which(credentials$username_id==input$userName)]=="prof") {
           tabItems(
             tabItem(
@@ -155,6 +163,7 @@ server <- function(input, output, session) {
           )
         }
         else{
+          #Credencial de Gestante
           if (credentials[,"permission"][which(credentials$username_id==input$userName)]=="gest") {
             tabItems(
               tabItem(
@@ -170,6 +179,7 @@ server <- function(input, output, session) {
             )
           }
           else{
+            #Credencial de equipe
             if (credentials[,"permission"][which(credentials$username_id==input$userName)]=="equi") {
               tabItems(
                 tabItem(
@@ -196,7 +206,8 @@ server <- function(input, output, session) {
       loginpage
     }
   })
-  
+
+  #  
   output$results <-  DT::renderDataTable({
     datatable(iris, options = list(autoWidth = TRUE,
                                    searching = FALSE))
