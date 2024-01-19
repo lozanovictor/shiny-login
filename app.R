@@ -27,11 +27,10 @@ loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margi
                                   class = "text-center"))),
                      br(),
                      br(),
-                     tags$code("Username: admin, prof, gest, equi, gestor"),
+                     tags$code("Username: 11111"),
                      br(),
-                     tags$code("Password: admin, prof, gest, equi, gestor"), 
-                     br(),
-                     tags$code("match them")
+                     tags$code("Password: 123"), 
+                     br()
                    ))
 )
 
@@ -41,13 +40,14 @@ loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margi
 dados_bd <- dbConnect(RSQLite::SQLite(), "D:/app-1/app/teste-funcoes/teste.db")
 #Seleciona os dados de login da tabela usuario
 credentials <- dbGetQuery(dados_bd, "SELECT telefone AS username_id, senha AS passod, email, `tipo-usuario` AS permission FROM usuario", stringsAsFactors = F)
+#Desconecta do banco
+dbDisconnect(dados_login)
 #Aplica um hash na coluna das senhas
 credentials$passod <- sapply(credentials$passod, password_store)
 
 
 
 header <- dashboardHeader( title = "Painel Lateral", uiOutput("logoutbtn"))
-
 sidebar <- dashboardSidebar(uiOutput("sidebarpanel")) 
 body <- dashboardBody(shinyjs::useShinyjs(), uiOutput("body"))
 ui<-dashboardPage(header, sidebar, body, skin = "blue")
@@ -83,7 +83,6 @@ server <- function(input, output, session) {
   
   output$logoutbtn <- renderUI({
     req(USER$login)
-    dbDisconnect(dados_login)
     tags$li(a(icon("fa fa-sign-out"), "Logout", 
               href="javascript:window.location.reload(true)"),
             class = "dropdown", 
@@ -141,28 +140,28 @@ server <- function(input, output, session) {
   #dados
   #Adicionar externamente para não quebrar o Shiny
   data("gestantes")
-  gestantes_idade <- dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` AS `a9-idade-em-anos-completos`, count(*) AS `count`
-                                           FROM `respostas-questionario-inicial-triagem-gestante`
-                                           WHERE ((`respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` <> 15
-                                           OR `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` IS NULL)
-                                           AND (`respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` <> 16 OR `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` IS NULL) AND (`respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` <> 17 OR `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` IS NULL) AND `respostas-questionario-inicial-triagem-gestante`.`a14a-tem-restricao-medica` = 'Não' AND `respostas-questionario-inicial-triagem-gestante`.`a17-concordou-em-participar-e-assinou-tcle` = 'Sim')
-                                           GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos`
-                                          ORDER BY `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` ASC")
-  
-  gestantes_semanas <-dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a10-semana-gestacional` AS `a10-semana-gestacional`, count(*) AS `count`
-                                            FROM `respostas-questionario-inicial-triagem-gestante`
-                                            GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a10-semana-gestacional`
-                                            ORDER BY `respostas-questionario-inicial-triagem-gestante`.`a10-semana-gestacional` ASC")
-  
-  gestantes_consultas_prenatal <- dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a11-consulta-pre-natal-numero` AS `a11-consulta-pre-natal-numero`, count(*) AS `count`
-                                                        FROM `respostas-questionario-inicial-triagem-gestante`
-                                                        GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a11-consulta-pre-natal-numero`
-                                                        ORDER BY `respostas-questionario-inicial-triagem-gestante`.`a11-consulta-pre-natal-numero` ASC")
-  
-  gestantes_entrevistadora <-dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a1-entrevistador` AS `a1-entrevistador`, count(*) AS `count`
-                                                   FROM `respostas-questionario-inicial-triagem-gestante`
-                                                   GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a1-entrevistador`
-                                                   ORDER BY `count` DESC, `respostas-questionario-inicial-triagem-gestante`.`a1-entrevistador` ASC")
+#  gestantes_idade <- dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` AS `a9-idade-em-anos-completos`, count(*) AS `count`
+#                                           FROM `respostas-questionario-inicial-triagem-gestante`
+#                                           WHERE ((`respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` <> 15
+#                                           OR `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` IS NULL)
+#                                           AND (`respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` <> 16 OR `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` IS NULL) AND (`respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` <> 17 OR `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` IS NULL) AND `respostas-questionario-inicial-triagem-gestante`.`a14a-tem-restricao-medica` = 'Não' AND `respostas-questionario-inicial-triagem-gestante`.`a17-concordou-em-participar-e-assinou-tcle` = 'Sim')
+#                                           GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos`
+#                                          ORDER BY `respostas-questionario-inicial-triagem-gestante`.`a9-idade-em-anos-completos` ASC")
+#  
+#  gestantes_semanas <-dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a10-semana-gestacional` AS `a10-semana-gestacional`, count(*) AS `count`
+#                                            FROM `respostas-questionario-inicial-triagem-gestante`
+#                                            GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a10-semana-gestacional`
+#                                            ORDER BY `respostas-questionario-inicial-triagem-gestante`.`a10-semana-gestacional` ASC")
+#  
+#  gestantes_consultas_prenatal <- dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a11-consulta-pre-natal-numero` AS `a11-consulta-pre-natal-numero`, count(*) AS `count`
+#                                                        FROM `respostas-questionario-inicial-triagem-gestante`
+#                                                        GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a11-consulta-pre-natal-numero`
+#                                                        ORDER BY `respostas-questionario-inicial-triagem-gestante`.`a11-consulta-pre-natal-numero` ASC")
+#  
+#  gestantes_entrevistadora <-dbGetQuery(dados_bd, "SELECT `respostas-questionario-inicial-triagem-gestante`.`a1-entrevistador` AS `a1-entrevistador`, count(*) AS `count`
+#                                                   FROM `respostas-questionario-inicial-triagem-gestante`
+#                                                   GROUP BY `respostas-questionario-inicial-triagem-gestante`.`a1-entrevistador`
+#                                                   ORDER BY `count` DESC, `respostas-questionario-inicial-triagem-gestante`.`a1-entrevistador` ASC")
   #fim dos dados
   
   
